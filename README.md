@@ -17,62 +17,61 @@ def add_expense():
 
 # View Expenses
 def view_expense():
-    total = 0
-    category_total = {}
-
     try:
         with open("data.csv", "r") as file:
-            reader = csv.reader(file)
+            reader = list(csv.reader(file))
             print("\n--- Expenses ---")
 
-            for row in reader:
+            for i, row in enumerate(reader):
                 if len(row) < 4:
                     continue
-
-                name, amount, category, date = row
-                amount = float(amount)
-
-                print(f"{date} | {name} | {category} | ₹{amount}")
-                total += amount
-
-                if category in category_total:
-                    category_total[category] += amount
-                else:
-                    category_total[category] = amount
-
-        print(f"\n💰 Total Expense: ₹{total}")
-
-        print("\n📊 Category-wise:")
-        for cat, amt in category_total.items():
-            print(f"{cat}: ₹{amt}")
+                print(f"{i+1}. {row[3]} | {row[0]} | {row[2]} | ₹{row[1]}")
 
     except:
         print("No data found!")
 
-# Monthly Report
-def monthly_report():
-    month = input("Enter month (YYYY-MM): ")
-    total = 0
+# Delete Expense
+def delete_expense():
+    try:
+        with open("data.csv", "r") as file:
+            data = list(csv.reader(file))
+
+        view_expense()
+        num = int(input("Enter expense number to delete: "))
+
+        if 0 < num <= len(data):
+            data.pop(num - 1)
+
+            with open("data.csv", "w", newline="") as file:
+                writer = csv.writer(file)
+                writer.writerows(data)
+
+            print("❌ Expense deleted!")
+        else:
+            print("Invalid number!")
+
+    except:
+        print("Error deleting expense!")
+
+# Search by Category
+def search_expense():
+    category_search = input("Enter category to search: ").lower()
 
     try:
         with open("data.csv", "r") as file:
             reader = csv.reader(file)
-            print(f"\n--- Report for {month} ---")
+            print("\n--- Search Results ---")
 
             for row in reader:
                 if len(row) < 4:
                     continue
-
-                if row[3].startswith(month):
+                if row[2].lower() == category_search:
                     print(f"{row[3]} | {row[0]} | {row[2]} | ₹{row[1]}")
-                    total += float(row[1])
-
-        print(f"\nTotal for {month}: ₹{total}")
 
     except:
         print("No data found!")
 
-# Graph Function
+# Graph
 def show_graph():
     category_total = {}
 
@@ -87,35 +86,30 @@ def show_graph():
                 category = row[2]
                 amount = float(row[1])
 
-                if category in category_total:
-                    category_total[category] += amount
-                else:
-                    category_total[category] = amount
+                category_total[category] = category_total.get(category, 0) + amount
 
         if not category_total:
-            print("No data to show!")
+            print("No data!")
             return
 
-        categories = list(category_total.keys())
-        amounts = list(category_total.values())
-
-        plt.bar(categories, amounts)
+        plt.bar(category_total.keys(), category_total.values())
         plt.title("Expense by Category")
         plt.xlabel("Category")
         plt.ylabel("Amount")
         plt.show()
 
-    except Exception as e:
-        print("Error:", e)
+    except:
+        print("Error generating graph!")
 
 # Main Menu
 while True:
-    print("\n===== Expense Tracker =====")
+    print("\n===== Expense Tracker PRO =====")
     print("1. Add Expense")
     print("2. View Expenses")
-    print("3. Monthly Report")
-    print("4. Show Graph")
-    print("5. Exit")
+    print("3. Delete Expense")
+    print("4. Search by Category")
+    print("5. Show Graph")
+    print("6. Exit")
 
     choice = input("Enter choice: ")
 
@@ -124,10 +118,12 @@ while True:
     elif choice == '2':
         view_expense()
     elif choice == '3':
-        monthly_report()
+        delete_expense()
     elif choice == '4':
-        show_graph()
+        search_expense()
     elif choice == '5':
+        show_graph()
+    elif choice == '6':
         print("Goodbye!")
         break
     else:
