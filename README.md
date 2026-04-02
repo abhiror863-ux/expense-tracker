@@ -1,3 +1,4 @@
+import matplotlib.pyplot as plt
 # 💰 Expense Tracker (Python)
 
 ## 🚀 About
